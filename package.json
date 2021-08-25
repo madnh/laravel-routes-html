@@ -1,0 +1,16 @@
+{
+  "name": "laravel-routes-html",
+  "version": "1.0.0",
+  "description": "Export Laravel Routes to HTML page",
+  "bin": "app.js",
+  "dependencies": {
+    "cac": "^6.7.3",
+    "lodash": "^4.17.21",
+    "nunjucks": "^3.2.3"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.171"
+  },
+  "author": "MaDnh <dodanhmanh@gmail.com>",
+  "license": "MIT"
+}

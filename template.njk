@@ -1,0 +1,245 @@
+{% macro middlewareBadge(name) %}
+{% if name.startsWith('can:') %}
+<span class="badge bg-success border-start border-5 border-danger">{{ name }}</span>
+{% else %}
+<span class="badge bg-success">{{ name }}</span>
+{% endif %}
+{% endmacro %}
+
+{% macro methodBadge(method) %}
+{% set methodColors = {
+GET: 'info',
+HEAD: 'success',
+POST: 'primary',
+PUT: 'warning',
+DELETE: 'danger',
+_DEFAULT: 'secondary' } %}
+<span class="badge bg-{{ methodColors[method] or methodColors._DEFAULT }}">{{ method }}</span>
+{% endmacro %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <style>
+    body {
+      font-size: .875rem;
+    }
+
+    /*
+ * Sidebar
+ */
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      /* rtl:raw:
+  right: 0;
+  */
+      bottom: 0;
+      /* rtl:remove */
+      left: 0;
+      z-index: 100;
+      /* Height of navbar */
+      box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+      overflow: scroll;
+    }
+
+    @media (max-width: 767.98px) {
+      .sidebar {
+        top: 5rem;
+      }
+    }
+
+    .sidebar-sticky {
+      position: relative;
+      top: 0;
+      height: calc(100vh - 48px);
+      padding-top: .5rem;
+      overflow-x: hidden;
+      overflow-y: auto;
+      /* Scrollable contents if viewport is shorter than content. */
+    }
+
+    .sidebar .nav-link {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .sidebar .nav-link .feather {
+      margin-right: 4px;
+      color: #727272;
+    }
+
+    .sidebar .nav-link.active {
+      color: #2470dc;
+    }
+
+    .sidebar .nav-link:hover .feather,
+    .sidebar .nav-link.active .feather {
+      color: inherit;
+    }
+
+    .sidebar-heading {
+      font-size: .75rem;
+      text-transform: uppercase;
+    }
+
+    /*
+ * Navbar
+ */
+
+    .navbar-brand {
+      padding-top: .75rem;
+      padding-bottom: .75rem;
+      font-size: 1rem;
+      background-color: rgba(0, 0, 0, .25);
+      box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+    }
+
+    .route-group {
+      position: relative;
+    }
+
+    .route-group__title {
+      /* position: sticky;
+      top: 0; */
+      background-color: white;
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+    .copiable {
+      cursor: copy;
+    }
+
+    /* .table-heading{
+      position: sticky;
+      top: 70px;
+    }
+    .subpart-heading {
+      position: sticky;
+      top: 108px;
+    } */
+  </style>
+  <script>
+  function copy(event, fieldName = null){
+    console.log(event);
+    const target = event.target;
+    if(!target) return
+    const content = fieldName ? target.attributes[fieldName].value : target.textContent
+    if(!content) return
+
+    navigator.clipboard.writeText(content);
+    console.log('Copy: ', content);
+  }
+  </script>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+        <div class="position-sticky">
+          {% for part in routes %}
+
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <a href="#{{ part.id }}"><span>
+                {{ part.name }}
+              </span></a>
+          </h6>
+
+          <ul class="nav flex-column mb-2">
+            {% for subPart in part.subParts %}
+            <li class="nav-item">
+              <a class="nav-link px-4 py-1" href="#{{ subPart.id }}">{{ subPart.name }}</a>
+            </li>
+            {% endfor %}
+
+          </ul>
+          {% endfor %}
+        </div>
+      </nav>
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <h1>{{ title }}</h1>
+        {% for part in routes %}
+        <!-- region {{ part.name }} -->
+        <div class="route-group">
+          <h2 id="{{part.id}}" class="route-group__title">
+            {{ part.name }}
+          </h2>
+          <div>
+            Domains:
+            {% for domain in part.domains %}
+            <code>{{domain}}</code>
+            {% else %}
+            none
+            {% endfor %}
+          </div>
+
+          {% for subPart in part.subParts %}
+          <h3 id="{{subPart.id}}" class="mt-5">
+            {{subPart.name}}
+          </h3>
+          <div>
+            Base middlewares:
+            {% for middleware in subPart.middlewares %}
+            {{ middlewareBadge(middleware) }}
+            {% else %}
+            none
+            {% endfor %}
+          </div>
+          <table class="table table-striped table-hover table-bordered mt-3">
+            <thead class="table-heading">
+              <tr class="bg-success">
+                <th scope="col" class="text-center">#</th>
+                <th scope="col">Method</th>
+                <th scope="col">URI</th>
+                <th scope="col">Middleware</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for route in subPart.partRoutes %}
+              <tr>
+                <td id="{{subPart.id}}__{{loop.index}}" class="text-center">
+                  <a href="#{{subPart.id}}__{{loop.index}}">
+                    {{ loop.index }}
+                  </a>
+                </td>
+                <td>
+                  {% for method in route.methods %}
+                    {{ methodBadge(method) }}
+                  {% endfor %}
+                </td>
+                <td>
+                  <code
+                    title="{{route.fullURI}}" onclick="copy(event, 'title')" class="copiable">{{ route.uri.replace(r/{/g, '<span class="badge bg-primary">:').replace(r/}/g, '</span>') | safe }}</code>
+                </td>
+                <td>
+                  {% for middleware in route.specifiedMiddlewares %}
+                    {{ middlewareBadge(middleware) }}
+                  {% endfor %}
+                </td>
+                <td><span title="{{ route.action }}" onclick="copy(event, 'title')" class="copiable">
+                    {{ route.sortAction | safe }}
+                  </span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% endfor %}
+        </div>
+        <!-- endregion {{ part.name }} -->
+        {% endfor %}
+      </main>
+    </div>
+  </div>
+</body>
+
+</html>
