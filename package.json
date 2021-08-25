@@ -12,5 +12,9 @@
     "@types/lodash": "^4.14.171"
   },
   "author": "MaDnh <dodanhmanh@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "files": [
+    "app.js",
+    "template.njk"
+  ]
 }
