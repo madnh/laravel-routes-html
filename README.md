@@ -2,6 +2,12 @@
 
 Convert Laravel exported routes to HTML page
 
+**Install**
+> npm i -g laravel-routes-html
+
+**Command**
+> laravel-routes-html
+
 
 ```
 laravel-routes-html/1.0.0
