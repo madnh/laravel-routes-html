@@ -1,6 +1,6 @@
 {
   "name": "laravel-routes-html",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Export Laravel Routes to HTML page",
   "bin": "app.js",
   "dependencies": {
